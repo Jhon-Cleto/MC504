@@ -23,7 +23,7 @@ struct thread_data
 
 
 // Ponteiros Globais para as matrizes A, B e C
-matrix_t *A, *B, *R;
+matrix_t *A, *B, *C;
 
 matrix_t *allocata_matrix(uli rows, uli cols)
 {
@@ -48,7 +48,7 @@ void initialize_matrices(uli ra, uli ca, uli rb, uli cb, uli seed)
     // Alocar as estruturas
     A = allocata_matrix(ra, ca);
     B = allocata_matrix(rb, cb);
-    R = allocata_matrix(ra, cb);
+    C = allocata_matrix(ra, cb);
 
     // Inserir os elementos da matriz A
     for (uli i = 0; i < ra*ca; i++)
@@ -58,8 +58,8 @@ void initialize_matrices(uli ra, uli ca, uli rb, uli cb, uli seed)
     for (uli i = 0; i < rb*cb; i++)
         B->mat[i] = rand() % MOD_N;
 
-    // Iniciar todas as posições da matriz R em 0
-    memset(R->mat, 0, ra*cb*sizeof(int));
+    // Iniciar todas as posições da matriz C em 0
+    memset(C->mat, 0, ra*cb*sizeof(int));
 }
 
 // Função que imprime uma matriz na tela
@@ -77,12 +77,12 @@ void print_matrix(matrix_t *m)
 }
 
 // Função que calcula a multiplicação
-// para todos os elementos em uma linha da matriz R
+// para todos os elementos em uma linha da matriz C
 void *multiply(void *arg)
 {
     thread_data_t t_data = *((thread_data_t *) arg);
     uli row = t_data.row, a_cols = A->cols, b_cols = B->cols;
-    int *a_mat = A->mat, *b_mat = B->mat, *r_mat = R->mat;
+    int *a_mat = A->mat, *b_mat = B->mat, *c_mat = C->mat;
     int sum;
 
     for (uli j = 0; j < b_cols; j++)
@@ -91,7 +91,7 @@ void *multiply(void *arg)
         for (uli k = 0; k < a_cols; k++)
             sum += a_mat[row*a_cols + k] * b_mat[k*b_cols + j];
 
-        r_mat[row*b_cols + j] = sum;
+        c_mat[row*b_cols + j] = sum;
     }
 
     return NULL;
@@ -127,11 +127,11 @@ int main(int argc, char *argv[])
     initialize_matrices(rows_a, cols_a, rows_b, cols_b, seed);
 
     // Imprimir as matrizes utilizadas na multiplicação
-    printf("Multiplicação de Matrizes:\nA x B = R\n");
-    printf("Matriz A:\n");
+    printf("Multiplicação de Matrizes: A x B = C\n\n");
+    printf("Matriz A (%u x %u):\n", rows_a, cols_a);
     print_matrix(A);
     printf("\n");
-    printf("Matriz B:\n");
+    printf("Matriz B (%u x %u):\n", rows_b, cols_b);
     print_matrix(B);
     printf("\n");
 
@@ -151,13 +151,13 @@ int main(int argc, char *argv[])
         pthread_join(t_ids[i], NULL);
     
     // Printar a Matriz Resultado
-    printf("Matriz R:\n");
-    print_matrix(R);
+    printf("Matriz C (%u x %u):\n", rows_a, cols_b);
+    print_matrix(C);
 
     // Liberar o espeço alocado 
     deallocate_matrix(A);
     deallocate_matrix(B);
-    deallocate_matrix(R);    
+    deallocate_matrix(C);    
 
     return 0;
 }
