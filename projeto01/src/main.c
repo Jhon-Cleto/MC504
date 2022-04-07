@@ -45,6 +45,9 @@ void deallocate_matrix(matrix_t *m)
 // e inserir os valores gerados utilizando a semente
 void initialize_matrices(uli ra, uli ca, uli rb, uli cb, uli seed)
 {
+    // Definindo a semente para geração de numeros aleatórios
+    srand(seed);
+
     // Alocar as estruturas
     A = allocata_matrix(ra, ca);
     B = allocata_matrix(rb, cb);
