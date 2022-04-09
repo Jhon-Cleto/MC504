@@ -1,0 +1,13 @@
+Multiplicação de Matrizes: A x B = C
+
+Matriz A (2 x 2):
+ 004 004
+ 007 001
+
+Matriz B (2 x 2):
+ 001 008
+ 002 008
+
+Matriz C (2 x 2):
+ 012 064
+ 009 064
