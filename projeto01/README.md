@@ -6,6 +6,9 @@
 + Jhonatan Cléto, RA 256444
 + Mylena Roberta dos Santos, RA 222687
 
+## Tema
+Visando o desenvolvimento de uma aplicação utilizando pthreads sem a necessidade do uso de mecanismos de sincronização, implementamos um programa que realiza a multiplicação de duas matrizes. O esforço foi dividido de modo que cada thread calcula os valores de uma linha da matriz resultante.
+
 ## Arquivos
 ### Diretório bin
 Armazena os arquivos binários do projeto.
