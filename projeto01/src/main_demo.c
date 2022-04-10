@@ -128,14 +128,21 @@ void *show_result_matrix(void *arg)
                 if (mat[i*cols + j] == SYM)
                 {
                     if ((j != 0 && mat[i*cols + j-1] != SYM) || j == 0)
-                        printf(ANSI_COLOR_YELLOW " ***" ANSI_COLOR_RESET, mat[i*cols + j]);
+                    {
+                        printf(ANSI_COLOR_YELLOW);
+                        printf(" ***");
+                        printf( ANSI_COLOR_RESET);
+                    }
                     else
                         printf(" ***");
                 }
                 
                 else
-                    printf(ANSI_COLOR_GREEN " %03d" ANSI_COLOR_RESET, mat[i*cols + j]);
-
+                {
+                    printf(ANSI_COLOR_GREEN);
+                    printf(" %03d", mat[i*cols + j]);
+                    printf( ANSI_COLOR_RESET);
+                }
             }
 
             printf("\n");
@@ -178,10 +185,10 @@ int main(int argc, char *argv[])
 
     // Imprimir as matrizes utilizadas na multiplicação
     printf("Multiplicação de Matrizes: A x B = C\n\n");
-    printf("Matriz A (%u x %u):\n", rows_a, cols_a);
+    printf("Matriz A (%llu x %llu):\n", rows_a, cols_a);
     print_matrix(A);
     printf("\n");
-    printf("Matriz B (%u x %u):\n", rows_b, cols_b);
+    printf("Matriz B (%llu x %llu):\n", rows_b, cols_b);
     print_matrix(B);
     printf("\n");
     sleep(2);
@@ -205,6 +212,8 @@ int main(int argc, char *argv[])
     for (uli i = 0; i < rows_a; i++)
         pthread_join(t_ids[i], NULL);
     
+    pthread_join(t_ids[rows_a], NULL);
+
     // Liberar o espeço alocado 
     deallocate_matrix(A);
     deallocate_matrix(B);
