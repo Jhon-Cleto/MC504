@@ -2,7 +2,7 @@
 
 MATMUL_DEMO ?=
 
-rm -rf ./bin/*
+rm -rf ./bin/matmul*
 make -C src clean
 
 if [[ $MATMUL_DEMO -eq 1 ]]; then

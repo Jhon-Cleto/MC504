@@ -116,10 +116,10 @@ int main(int argc, char *argv[])
         return 1;
     }
     
-    unsigned rows_a, cols_a, rows_b, cols_b, seed;
-    fscanf(file, "%u %u", &rows_a, &cols_a);
-    fscanf(file, "%u %u", &rows_b, &cols_b);
-    fscanf(file, " %u", &seed);
+    uli rows_a, cols_a, rows_b, cols_b, seed;
+    fscanf(file, "%llu %llu", &rows_a, &cols_a);
+    fscanf(file, "%llu %llu", &rows_b, &cols_b);
+    fscanf(file, " %llu", &seed);
     
     if(cols_a != rows_b) {
         fprintf(stderr, "Erro: Matrizes com dimensões invalidas!\n");
@@ -131,10 +131,10 @@ int main(int argc, char *argv[])
 
     // Imprimir as matrizes utilizadas na multiplicação
     printf("Multiplicação de Matrizes: A x B = C\n\n");
-    printf("Matriz A (%u x %u):\n", rows_a, cols_a);
+    printf("Matriz A (%llu x %llu):\n", rows_a, cols_a);
     print_matrix(A);
     printf("\n");
-    printf("Matriz B (%u x %u):\n", rows_b, cols_b);
+    printf("Matriz B (%llu x %llu):\n", rows_b, cols_b);
     print_matrix(B);
     printf("\n");
 
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
         pthread_join(t_ids[i], NULL);
     
     // Printar a Matriz Resultado
-    printf("Matriz C (%u x %u):\n", rows_a, cols_b);
+    printf("Matriz C (%llu x %llu):\n", rows_a, cols_b);
     print_matrix(C);
 
     // Liberar o espeço alocado 

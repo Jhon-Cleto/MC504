@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #define MOD_N 10
+#define SYM -1
 
 // Cores no Terminal
 #define ANSI_COLOR_RED     "\x1b[31m"
@@ -72,7 +73,7 @@ void initialize_matrices(uli ra, uli ca, uli rb, uli cb, uli seed)
         B->mat[i] = rand() % MOD_N;
 
     // Iniciar todas as posições da matriz C em 0
-    memset(C->mat, 0, ra*cb*sizeof(int));
+    memset(C->mat, SYM, ra*cb*sizeof(int));
 }
 
 // Função que imprime uma matriz na tela
@@ -119,17 +120,17 @@ void *show_result_matrix(void *arg)
 
     while(1)
     {
-        printf("Matrix C (%u x %u):\n\n", rows, cols);
+        printf("Matrix C (%llu x %llu):\n\n", rows, cols);
         for (uli i = 0; i < rows; i++)
         {
             for (uli j = 0; j < cols; j++)
             {
-                if (mat[i*cols + j] == 0)
+                if (mat[i*cols + j] == SYM)
                 {
-                    if (j != 0 && mat[i*cols + j-1] != 0)
-                        printf(ANSI_COLOR_YELLOW " %03d" ANSI_COLOR_RESET, mat[i*cols + j]);
+                    if ((j != 0 && mat[i*cols + j-1] != SYM) || j == 0)
+                        printf(ANSI_COLOR_YELLOW " ***" ANSI_COLOR_RESET, mat[i*cols + j]);
                     else
-                        printf(" %03d", mat[i*cols + j]);
+                        printf(" ***");
                 }
                 
                 else
@@ -162,10 +163,10 @@ int main(int argc, char *argv[])
         return 1;
     }
     
-    unsigned rows_a, cols_a, rows_b, cols_b, seed;
-    fscanf(file, "%u %u", &rows_a, &cols_a);
-    fscanf(file, "%u %u", &rows_b, &cols_b);
-    fscanf(file, " %u", &seed);
+    uli rows_a, cols_a, rows_b, cols_b, seed;
+    fscanf(file, "%llu %llu", &rows_a, &cols_a);
+    fscanf(file, "%llu %llu", &rows_b, &cols_b);
+    fscanf(file, " %llu", &seed);
     
     if(cols_a != rows_b) {
         fprintf(stderr, "Erro: Matrizes com dimensões invalidas!\n");
@@ -189,6 +190,9 @@ int main(int argc, char *argv[])
     pthread_t t_ids[rows_a+1];
     thread_data_t t_data[rows_a];
 
+    // Thread que monitora as alterações na matriz C
+    pthread_create(&t_ids[rows_a], NULL, show_result_matrix, NULL);
+    
     // 1 thread por linha da matriz A
     for (uli i = 0; i < rows_a; i++)
     {
@@ -196,13 +200,11 @@ int main(int argc, char *argv[])
         pthread_create(&t_ids[i], NULL, multiply, &t_data[i]);
     }
     
-    pthread_create(&t_ids[rows_a], NULL, show_result_matrix, NULL);
     
     // Esperar até que as threads concluam suas multiplicações
     for (uli i = 0; i < rows_a; i++)
         pthread_join(t_ids[i], NULL);
     
-
     // Liberar o espeço alocado 
     deallocate_matrix(A);
     deallocate_matrix(B);
