@@ -3,9 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <math.h>
 
-#define n 10
+#define n 8
 #define C 5
 
 typedef unsigned int ui;
@@ -17,9 +16,7 @@ sem_t allAboard, allAshore;
 
 void *car()
 {
-    int rounds = (int)ceil((double)n / (double)C);
-
-    for (int i = 0; i < rounds; i++)
+    while(1)
     {
         // load();
         printf("O carro está pronto o embarque.\n");
@@ -48,31 +45,35 @@ void *passenger(void *p)
 {
     ui id = *(ui *)p;
 
-    sem_wait(&boardQueue);
-    // board();
-
-    sem_wait(&mutex1);
-    boarders++;
-    printf("O passageiro %d embarcou.\n", id);
-    if (boarders == C)
+    while (1)
     {
-        sem_post(&allAboard);
-        boarders = 0;
-    }
-    sem_post(&mutex1);
+        sleep(rand()%5); // delay na chegada dos passageiros
+        sem_wait(&boardQueue);
+        // board();
 
-    sem_wait(&unboardQueue);
-    // unboard();
+        sem_wait(&mutex1);
+        boarders++;
+        printf("O passageiro %d embarcou.\n", id);
+        if (boarders == C)
+        {
+            sem_post(&allAboard);
+            boarders = 0;
+        }
+        sem_post(&mutex1);
 
-    sem_wait(&mutex2);
-    unboarders++;
-    printf("O passageiro %d desembarcou.\n", id);
-    if (unboarders == C)
-    {
-        sem_post(&allAshore);
-        unboarders = 0;
+        sem_wait(&unboardQueue);
+        // unboard();
+
+        sem_wait(&mutex2);
+        unboarders++;
+        printf("O passageiro %d desembarcou.\n", id);
+        if (unboarders == C)
+        {
+            sem_post(&allAshore);
+            unboarders = 0;
+        }
+        sem_post(&mutex2);
     }
-    sem_post(&mutex2);
 
     return NULL;
 }
