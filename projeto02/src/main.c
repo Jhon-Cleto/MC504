@@ -9,14 +9,22 @@
 
 typedef unsigned int ui;
 
-ui boarders, unboarders;
+typedef struct passenger_data
+{
+    ui pid;
+    ui tickets;
+} p_data;
+
+ui boarders, unboarders, free_tickets;
 sem_t mutex1, mutex2;
 sem_t boardQueue, unboardQueue;
 sem_t allAboard, allAshore;
 
-void *car()
+void *car(void *arg)
 {
-    while(1)
+    ui rides = (n % C) == 0 ? n/C : n/C + 1;
+
+    while(rides--)
     {
         // load();
         printf("O carro está pronto o embarque.\n");
@@ -43,14 +51,16 @@ void *car()
 
 void *passenger(void *p)
 {
-    ui id = *(ui *)p;
+    p_data p_info = *((p_data*) p);
+    ui id = p_info.pid;
+    ui tickets = p_info.tickets;
 
-    while (1)
+    while (tickets--)
     {
         sleep(rand()%5); // delay na chegada dos passageiros
         sem_wait(&boardQueue);
+        
         // board();
-
         sem_wait(&mutex1);
         boarders++;
         printf("O passageiro %d embarcou.\n", id);
@@ -62,8 +72,8 @@ void *passenger(void *p)
         sem_post(&mutex1);
 
         sem_wait(&unboardQueue);
+        
         // unboard();
-
         sem_wait(&mutex2);
         unboarders++;
         printf("O passageiro %d desembarcou.\n", id);
@@ -72,9 +82,17 @@ void *passenger(void *p)
             sem_post(&allAshore);
             unboarders = 0;
         }
+
+        if (free_tickets)
+        {
+            free_tickets--;
+            tickets++;
+            printf("O passageiro %d conseguiu um novo ticket para embarcar.\n", id);
+        }
         sem_post(&mutex2);
     }
 
+    printf("O passageiro %d não vai embarcar novamente.\n", id);
     return NULL;
 }
 
@@ -82,6 +100,7 @@ int main(int argc, char *argv[])
 {
     ui id_psgr[n];
     pthread_t thr_psgrs[n], thr_car;
+    p_data p_infos[n];
 
     sem_init(&mutex1, 0, 1);
     sem_init(&mutex2, 0, 1);
@@ -90,10 +109,14 @@ int main(int argc, char *argv[])
     sem_init(&allAboard, 0, 0);
     sem_init(&allAshore, 0, 0);
 
+    free_tickets = C - (n % C);
+
     for (ui i = 0; i < n; i++)
     {
+        p_infos[i].pid = i;
+        p_infos[i].tickets = 1;
         id_psgr[i] = i;
-        pthread_create(&thr_psgrs[i], NULL, passenger, (void *)&id_psgr[i]);
+        pthread_create(&thr_psgrs[i], NULL, passenger, (void *)&p_infos[i]);
     }
 
     pthread_create(&thr_car, NULL, car, NULL);
