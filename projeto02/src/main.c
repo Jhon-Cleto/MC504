@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     sem_init(&allAboard, 0, 0);
     sem_init(&allAshore, 0, 0);
 
-    free_tickets = C - (n % C);
+    free_tickets = (n % C) != 0 ? C - (n % C) : 0;
 
     for (ui i = 0; i < n; i++)
     {
