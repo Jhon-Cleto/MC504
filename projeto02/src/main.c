@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define n 8
+#define n 16
 #define C 5
 
 typedef unsigned int ui;
@@ -19,6 +19,10 @@ ui boarders, unboarders, free_tickets;
 sem_t mutex1, mutex2;
 sem_t boardQueue, unboardQueue;
 sem_t allAboard, allAshore;
+
+pthread_mutex_t lr_mutex;
+pthread_cond_t lr_cond;
+int last_ride = 0;
 
 void *car(void *arg)
 {
@@ -42,6 +46,16 @@ void *car(void *arg)
 
         for (ui i = 0; i < C; i++)
             sem_post(&unboardQueue);
+
+        // Avisar aos passageiros sobre a última corrida
+        if (rides == 1)
+        {
+            pthread_mutex_lock(&lr_mutex);
+            printf("O carro está pronto para a última viagem.\n");
+            pthread_cond_broadcast(&lr_cond);
+            last_ride = 1;
+            pthread_mutex_unlock(&lr_mutex);
+        }
 
         sem_wait(&allAshore);
     }
@@ -82,6 +96,11 @@ void *passenger(void *p)
             sem_post(&allAshore);
             unboarders = 0;
         }
+        sem_post(&mutex2);
+
+        pthread_mutex_lock(&lr_mutex);
+        if (!last_ride)
+            pthread_cond_wait(&lr_cond, &lr_mutex);
 
         if (free_tickets)
         {
@@ -89,10 +108,10 @@ void *passenger(void *p)
             tickets++;
             printf("O passageiro %d conseguiu um novo ticket para embarcar.\n", id);
         }
-        sem_post(&mutex2);
+        pthread_mutex_unlock(&lr_mutex);
     }
 
-    printf("O passageiro %d não vai embarcar novamente.\n", id);
+    // printf("O passageiro %d não vai embarcar novamente.\n", id);
     return NULL;
 }
 
