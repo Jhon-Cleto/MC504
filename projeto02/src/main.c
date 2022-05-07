@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "animation.h"
 
 #define n 16
 #define C 5
@@ -40,6 +41,7 @@ void *car(void *arg)
 
         // run();
         printf("O carro está se movimentando.\n");
+        move_car_scene();
 
         // unload();
         printf("O carro está pronto o desembarque.\n");
@@ -78,6 +80,7 @@ void *passenger(void *p)
         sem_wait(&mutex1);
         boarders++;
         printf("O passageiro %d embarcou.\n", id);
+        boarding_scene();
         if (boarders == C)
         {
             sem_post(&allAboard);
@@ -91,6 +94,7 @@ void *passenger(void *p)
         sem_wait(&mutex2);
         unboarders++;
         printf("O passageiro %d desembarcou.\n", id);
+        unboarding_scene();
         if (unboarders == C)
         {
             sem_post(&allAshore);
@@ -107,6 +111,7 @@ void *passenger(void *p)
             free_tickets--;
             tickets++;
             printf("O passageiro %d conseguiu um novo ticket para embarcar.\n", id);
+            new_boarding_scene();
         }
         pthread_mutex_unlock(&lr_mutex);
     }
@@ -120,6 +125,8 @@ int main(int argc, char *argv[])
     ui id_psgr[n];
     pthread_t thr_psgrs[n], thr_car;
     p_data p_infos[n];
+
+    start_animation(n);
 
     sem_init(&mutex1, 0, 1);
     sem_init(&mutex2, 0, 1);
