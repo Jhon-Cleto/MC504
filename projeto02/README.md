@@ -64,7 +64,7 @@ Sua finalidade é de condensar, em uma única estrutura, o parâmetro necessári
 
 ## Funções
 ### ***car***
-+ **Parâmetros**: apontador para `void` (apenas para atender ao cabeçalho de função de thread).
++ **Parâmetros**: apontador para `void` (apenas para atender ao cabeçalho de função de thread, não será utilizado).
 + **Retorno**: apontador para `void`.
 + **Funcionamento**: essa função é responsável pelo funcionamento do carro. Nela estão contidos os métodos **load()**, **run()** e **unload()**. Além disso, ela é responsável por avisar os passageiros quando for a última corrida, para distribuição de *tickets*, quando aplicável. Essa é a função executada pela *thread* de carro. Ao longo de sua execução, ela chama as funções **update_log_message()** e **move_car_scene()**. 
 
