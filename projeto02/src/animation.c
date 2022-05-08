@@ -66,6 +66,7 @@ int boardingPositionX = 35;
 int boardingPositionY = 12; 
 int unboardPositionX = 9;
 int unboardPositionY = 12;
+int count = 0;
 pthread_mutex_t log_lock;
 
 //Atualiza tela
@@ -85,6 +86,17 @@ void update_log_message(char message[])
   for (int i = 0; i < S_WIDTH; i++)
     screen[logPosition][i] = message[i];
   pthread_mutex_unlock(&log_lock);
+}
+
+char intToChar(int number){
+  char charNumber[2];
+  sprintf(charNumber, "%d", number);
+  return *charNumber;
+}
+
+void updateCount(){
+  screen[17][28] = intToChar(count/10);
+  screen[18][28] = intToChar(count%10);
 }
 
 //Adiciona passageiros na area de embarque 
@@ -117,7 +129,9 @@ void boarding_scene(){
     boardingPositionX-=1;
   }
   screen[boardingPositionY][boardingPositionX] = VOID_SYMBOL;
-  
+  count++;
+  updateCount();
+
   int carHead = 22, symCol = 28;
 
   
@@ -176,7 +190,15 @@ void move_one_step2(int carHead, int carTail)
   for (int i = carHead; i >= 0 ; i--)
   {
     screen[i][columnStart] = '[';
-    screen[i][columnStart+1] = FILLED_SYMBOL;
+    if(i==1){
+      screen[i][columnStart+1] = intToChar(count/10);
+    }
+    else if(i==2){
+      screen[i][columnStart+1] = intToChar(count%10);
+    }
+    else{
+      screen[i][columnStart+1] = FILLED_SYMBOL;
+    }
     screen[i][columnStart+2] = ']';
   }
 
@@ -245,7 +267,8 @@ void unboarding_scene(){
   }
 
   screen[unboardPositionY][unboardPositionX] = FILLED_SYMBOL;
-
+  count--;
+  updateCount();
   if(unboardPositionX>20){
     unboardPositionY+=1;
     unboardPositionX=9;
