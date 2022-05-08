@@ -97,6 +97,7 @@ char intToChar(int number){
 void updateCount(){
   screen[17][28] = intToChar(count/10);
   screen[18][28] = intToChar(count%10);
+  usleep(0.3e6);
 }
 
 //Adiciona passageiros na area de embarque 
