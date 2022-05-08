@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include "animation.h"
 
-#define n 16
-#define C 5
+#define CLEAN "\e[1;1H\e[2J"
 
 typedef unsigned int ui;
 
@@ -16,6 +16,7 @@ typedef struct passenger_data
     ui tickets;
 } p_data;
 
+int n, C;
 ui boarders, unboarders, free_tickets;
 sem_t mutex1, mutex2;
 sem_t boardQueue, unboardQueue;
@@ -28,24 +29,29 @@ int last_ride = 0;
 void *car(void *arg)
 {
     ui rides = (n % C) == 0 ? n/C : n/C + 1;
-
+    char log[100];
+    memset(log, 0, sizeof(log));
+    
     while(rides--)
     {
         // load();
-        printf("O carro está pronto o embarque.\n");
 
+        sprintf(log, "O carro está pronto o embarque.\n");
+        update_log_message(log);
+        
         for (ui i = 0; i < C; i++)
             sem_post(&boardQueue);
 
         sem_wait(&allAboard);
 
         // run();
-        printf("O carro está se movimentando.\n");
+        sprintf(log, "O carro está se movimentando.\n");
+        update_log_message(log);
         move_car_scene();
 
         // unload();
-        printf("O carro está pronto o desembarque.\n");
-
+        sprintf(log, "O carro está pronto o desembarque.\n");
+        update_log_message(log);
         for (ui i = 0; i < C; i++)
             sem_post(&unboardQueue);
 
@@ -53,7 +59,8 @@ void *car(void *arg)
         if (rides == 1)
         {
             pthread_mutex_lock(&lr_mutex);
-            printf("O carro está pronto para a última viagem.\n");
+            sprintf(log, "O carro está pronto para a última viagem.\n");
+            update_log_message(log);
             pthread_cond_broadcast(&lr_cond);
             last_ride = 1;
             pthread_mutex_unlock(&lr_mutex);
@@ -70,6 +77,8 @@ void *passenger(void *p)
     p_data p_info = *((p_data*) p);
     ui id = p_info.pid;
     ui tickets = p_info.tickets;
+    char log[100];
+    memset(log, 0, sizeof(log));
 
     while (tickets--)
     {
@@ -79,7 +88,8 @@ void *passenger(void *p)
         // board();
         sem_wait(&mutex1);
         boarders++;
-        printf("O passageiro %d embarcou.\n", id);
+        sprintf(log, "O passageiro %d embarcou.\n", id);
+        update_log_message(log);
         boarding_scene();
         if (boarders == C)
         {
@@ -93,7 +103,8 @@ void *passenger(void *p)
         // unboard();
         sem_wait(&mutex2);
         unboarders++;
-        printf("O passageiro %d desembarcou.\n", id);
+        sprintf(log, "O passageiro %d desembarcou.\n", id);
+        update_log_message(log);
         unboarding_scene();
         if (unboarders == C)
         {
@@ -110,23 +121,39 @@ void *passenger(void *p)
         {
             free_tickets--;
             tickets++;
-            printf("O passageiro %d conseguiu um novo ticket para embarcar.\n", id);
+            sprintf(log, "O passageiro %d conseguiu um novo ticket para embarcar.\n", id);
+            update_log_message(log);
             new_boarding_scene();
         }
         pthread_mutex_unlock(&lr_mutex);
     }
 
-    // printf("O passageiro %d não vai embarcar novamente.\n", id);
     return NULL;
 }
 
 int main(int argc, char *argv[])
 {
-    ui id_psgr[n];
+
+    // Dados Iniciais
+    printf(CLEAN);   
+    printf("The Roller Coaster Problem\n");
+    printf("Digite o número total de passageiros:\n");
+    scanf(" %d", &n);
+    printf("Digire o número de assentos no carrinho:\n");
+    scanf(" %d", &C);
+
+    if (n < C)
+    {
+        printf("O número de passageiros é insuficiente!\n");
+        printf("A Montanha Russa não abrirá hoje!\n");
+        return 0;
+    }
+
     pthread_t thr_psgrs[n], thr_car;
     p_data p_infos[n];
 
     start_animation(n);
+
 
     sem_init(&mutex1, 0, 1);
     sem_init(&mutex2, 0, 1);
@@ -141,7 +168,6 @@ int main(int argc, char *argv[])
     {
         p_infos[i].pid = i;
         p_infos[i].tickets = 1;
-        id_psgr[i] = i;
         pthread_create(&thr_psgrs[i], NULL, passenger, (void *)&p_infos[i]);
     }
 
