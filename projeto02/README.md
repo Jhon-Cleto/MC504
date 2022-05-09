@@ -30,12 +30,10 @@ Armazena os arquivos binários do projeto.
 
 ### Diretório *src*
 Armazena os códigos fontes do projeto. São eles:
++ `Makefile`: arquivo para compilar o programa.
 + `main.c`: código que faz a *implementação* e a *sincronização* das threads dos passageiros e do carrinho, além da *distribuição* dos tickets. Dados os valores de C e n, esse código determina como serão feitas as viagens do carrinho.
 + `animation.c`: código que implementa a *animação* da montanha-russa no terminal. A animação compreende o embarque, o desembarque e a movimentação do carrinho.
 + `animation.h`: arquivo header que contém as funções do arquivo `animation.c`.
-
-### Diretório *tests*
-Armazena os casos de teste (arquivos `.in`), as saídas esperadas para cada um (arquivos `.out`) e um *script* (`runTests.sh`) que executa o programa e compara as saídas obtidas com aquelas previstas.
 
 ## Estruturas de Dados
 ### **struct *passenger_data***
@@ -71,16 +69,19 @@ Apesar de não ser um mutex, essa *condição* está inserida nessa seção pois
 ### log_lock
 Esse mutex está presente para garantir que apenas uma *thread* (o carro ou algum passageiro) esteja alterando a mensagem do log na animação. Ele garante exclusão mútua à alteração da mensagem.
 
+### add_lock
+Esse mutex está presente para garantir que apenas uma *thread* (de passageiro) esteja adicionando um passageiro à matriz da tela. Ele garante exclusão mútua à posição da matriz destinada ao passageiro, evitando que duas *threads* adicionem o mesmo símbolo P, o que acarretaria em uma contagem errada de passageiros na matriz da tela.
+
 ## Funções
 ### ***car***
 + **Parâmetros**: apontador para `void` (apenas para atender ao cabeçalho de função de thread, não será utilizado).
 + **Retorno**: apontador para `void`.
-+ **Funcionamento**: essa função é responsável pelo funcionamento do carro, que compreende: sinalizar que está pronto para receber passageiros, andar e sinalizar que os passageiros podem desembarcar. Além disso, ela é responsável por avisar os passageiros quando for a última corrida, para distribuição de *tickets*, quando aplicável. Essa é a função executada pela *thread* de carro. Ao longo de sua execução, ela chama as funções **update_log_message()** e **move_car_scene()**. 
++ **Funcionamento**: essa função é responsável pelo funcionamento do carro, que compreende: sinalizar que está pronto para receber passageiros, andar e sinalizar que os passageiros podem desembarcar. Além disso, ela é responsável por avisar os passageiros quando for a última corrida, para distribuição de *tickets*, quando aplicável. Essa é a função executada pela *thread* de carro. Ao longo de sua execução, ela chama as funções **update_log_message()**, **move_car_scene()** e **update_ride_log()**. 
 
 ### ***passenger***
 + **Parâmetros**: apontador para `void` (é esperado que esse parâmetro seja um apontador para `passenger_data`).
 + **Retorno**: apontador para `void`.
-+ **Funcionamento**: essa função é responsável por um passageiro desde seu embarque, até seu desembarque, verificação se ele pode concorrer por mais *tickets* e, eventualmente, até a competição por *tickets* extras. Essa é a função executada por cada *thread* de passageiro. Ao longo de sua execução, ela chama as funções **update_log_message()**, **boarding_scene()**, **unboarding_scene()** e **new_boarding_scene()**. 
++ **Funcionamento**: essa função é responsável por um passageiro desde seu embarque, até seu desembarque, verificação se ele pode concorrer por mais *tickets* e, eventualmente, até a competição por *tickets* extras. Essa é a função executada por cada *thread* de passageiro. Ao longo de sua execução, ela chama as funções **update_log_message()**, **boarding_scene()**, **unboarding_scene()**, **new_boarding_scene()** e **arrival_scene()**. 
 
 ### ***printScreen***
 + **Parâmetros**: nenhum.
@@ -88,7 +89,7 @@ Esse mutex está presente para garantir que apenas uma *thread* (o carro ou algu
 + **Funcionamento**: essa função é responsável por atualizar a tela do terminal, dando continuidade à animação. Ela imprime o *estado atual* da matriz da tela.
 
 ### ***update_log_message***
-+ **Parâmetros**: um vetor de `char`.
++ **Parâmetros**: um vetor de `char` contendo a mensagem para o log.
 + **Retorno**: nenhum.
 + **Funcionamento**: essa função é responsável por atualizar a mensagem presente na região de log da matriz tela. Essa mensagem descreve o que o estado atual da animação está mostrando.
 
@@ -108,7 +109,7 @@ Esse mutex está presente para garantir que apenas uma *thread* (o carro ou algu
 + **Funcionamento**: essa função é responsável pela *adição* dos passageiros na área de *embarque*. Ela atualiza a região de embarque da matriz da tela.
 
 ### ***start_animation***
-+ **Parâmetros**: um `inteiro` que indica o número de passageiros.
++ **Parâmetros**: duas variáveis do tipo `inteiro`: uma que indica o número de passageiros e outra que indica o número de passageiros que cabem no carrinho (**C**).
 + **Retorno**: nenhum.
 + **Funcionamento**: essa função é responsável pelo início do ambiente de animação. Ela adiciona os passageiros na matriz da tela, chamando a função **addPassenger()** em um *loop*, até ter adicionado todos. Além disso, ela chama a função **printScreen()** para imprimir o estado inicial da montanha-russa no terminal.
 
@@ -141,3 +142,13 @@ Esse mutex está presente para garantir que apenas uma *thread* (o carro ou algu
 + **Parâmetros**: nenhum.
 + **Retorno**: nenhum.
 + **Funcionamento**: essa função é responsável pela animação de quando os passageiros deixam a área de desembarque e *retornam* para a área de *embarque*. Ela atualiza a região de desembarque da matriz da tela e chama a função **addPassenger()** para adicionar o passageiro na região de embarque.
+
+### ***update_ride_log***
++ **Parâmetros**: uma variável do tipo `unsigned int` que indica o número identificador da corrida.
++ **Retorno**: nenhum.
++ **Funcionamento**: essa função é responsável por atualizar o número identificador da corrida na matriz da tela.
+
+### ***arrival_scene***
++ **Parâmetros**: uma variável do tipo `int`.
++ **Retorno**: nenhum.
++ **Funcionamento**: essa função é responsável pela animação de quando os passageiros chegam à área de embarque, incluindo a mensagem do log e a chamada da função **addPassenger()**.
