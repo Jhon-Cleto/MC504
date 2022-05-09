@@ -17,7 +17,7 @@ Esse problema é uma versão modificada do problema homônimo contido em “The 
 
 Suponha que existam n threads de passageiros e uma thread de carro. Os passageiros esperam repetidamente para andar no carro, que comporta C passageiros, onde C < n. O carro só pode dar a volta nos trilhos quando estiver cheio.
 
-Os passageiros devem andar *pelo menos uma vez* no carro, além de realizar o **embarque** e o **desembarque**. Adicionalmente, os passageiros *não podem embarcar sem tickets* e sem que o carro tenha sinalizado que está pronto para receber passageiros. É importante ressaltar que, por questões de segurança, os passageiros não podem desembarcar sem que o carro tenha sinalizado que os passageiros podem desembarcar.
+Os passageiros devem andar *pelo menos uma vez* no carro, além de realizar o embarque e o desembarque. Adicionalmente, os passageiros *não podem embarcar sem tickets* e sem que o carro tenha sinalizado que está pronto para receber passageiros. É importante ressaltar que, por questões de segurança, os passageiros não podem desembarcar sem que o carro tenha sinalizado que os passageiros podem desembarcar.
 
 O carro *não pode partir* até que C passageiros tenham embarcado. Ademais, o carro deve sinalizar que está pronto para receber passageiros, andar e sinalizar que os passageiros podem desembarcar.
 
@@ -35,9 +35,10 @@ Armazena os códigos fontes do projeto. São eles:
 + `animation.c`: código que implementa a *animação* da montanha-russa no terminal. A animação compreende o embarque, o desembarque e a movimentação do carrinho.
 + `animation.h`: arquivo header que contém as funções do arquivo `animation.c`.
 
+
 ## Estruturas de Dados
 ### **struct *passenger_data***
-Possui duas variáveis do tipo *unsigned Int*: uma para guardar o id do passageiro e outra para o número de tickets que ele possui.  
+Possui duas variáveis do tipo `unsigned int`: uma para guardar o id do passageiro e outra para o número de tickets que ele possui.  
 Sua finalidade é de condensar, em uma única estrutura, o parâmetro necessário a ser passado para a função que será executada pelas *threads de passageiro*.
 
 ## Semáforos
@@ -71,6 +72,7 @@ Esse mutex está presente para garantir que apenas uma *thread* (o carro ou algu
 
 ### add_lock
 Esse mutex está presente para garantir que apenas uma *thread* (de passageiro) esteja adicionando um passageiro à matriz da tela. Ele garante exclusão mútua à posição da matriz destinada ao passageiro, evitando que duas *threads* adicionem o mesmo símbolo P, o que acarretaria em uma contagem errada de passageiros na matriz da tela.
+
 
 ## Funções
 ### ***car***
@@ -109,7 +111,7 @@ Esse mutex está presente para garantir que apenas uma *thread* (de passageiro) 
 + **Funcionamento**: essa função é responsável pela *adição* dos passageiros na área de *embarque*. Ela atualiza a região de embarque da matriz da tela.
 
 ### ***start_animation***
-+ **Parâmetros**: duas variáveis do tipo `inteiro`: uma que indica o número de passageiros e outra que indica o número de passageiros que cabem no carrinho (**C**).
++ **Parâmetros**: duas variáveis do tipo `inteiro`, uma que indica o número de passageiros e outra que indica o número de passageiros que cabem no carrinho (**C**).
 + **Retorno**: nenhum.
 + **Funcionamento**: essa função é responsável pelo início do ambiente de animação. Ela adiciona os passageiros na matriz da tela, chamando a função **addPassenger()** em um *loop*, até ter adicionado todos. Além disso, ela chama a função **printScreen()** para imprimir o estado inicial da montanha-russa no terminal.
 
@@ -119,12 +121,12 @@ Esse mutex está presente para garantir que apenas uma *thread* (de passageiro) 
 + **Funcionamento**: essa função é responsável pela animação de *embarque* dos passageiros. Ela atualiza a região de embarque da matriz e chama a função **printScreen()** para atualizar o estado atual da montanha-russa no terminal.
 
 ### ***move_one_step***
-+ **Parâmetros**: dois `inteiros`: um que indica a posição da frente do carro e outra que indica a posição da traseira do carro.
++ **Parâmetros**: dois `inteiros`, um que indica a posição da frente do carro e outra que indica a posição da traseira do carro.
 + **Retorno**: nenhum.
 + **Funcionamento**: essa função é responsável por mover o carro na matriz da tela, de cima para baixo, em uma posição. Ela considera que a traseira do carro está em uma posição válida da região da matriz que corresponde ao trilho do carro.
 
 ### ***move_one_step2***
-+ **Parâmetros**: dois `inteiros`: um que indica a posição da frente do carro e outra que indica a posição da traseira do carro.
++ **Parâmetros**: dois `inteiros`, um que indica a posição da frente do carro e outra que indica a posição da traseira do carro.
 + **Retorno**: nenhum.
 + **Funcionamento**: essa função é responsável por mover o carro na matriz da tela, de cima para baixo, em uma posição. Ela considera que a traseira do carro está em uma posição inválida da região da matriz que corresponde ao trilho do carro.
 
