@@ -137,7 +137,7 @@ void arrival_scene(int pid)
 {
   char log[100];
   memset(log, 0, sizeof(log));
-  sprintf(log, "O passageiros %d entrou na zona de embarque.\n", pid);
+  sprintf(log, "O passageiro %d entrou na zona de embarque.\n", pid);
   update_log_message(log);
   addPassenger();
 }
