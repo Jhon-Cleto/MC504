@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <string.h>
 
 #include "animation.h"
 
@@ -47,10 +48,10 @@ char screen[S_HEIGHT][S_WIDTH]= {
   "      ~                ~ |     | ~                ~      \n",
   "      ~~~~~~~~~~~~~~~~~~ |     | ~~~~~~~~~~~~~~~~~~      \n",
   "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
+  "                         |     |       Dados:            \n",
+  "                         |     |       n:                \n",
+  "                         |     |       C:                \n",
+  "                         |     |       Corrida:          \n",
   "                         |     |                         \n",
   "                         |     |                         \n",
   "                         |     |                         \n",
@@ -67,7 +68,7 @@ int boardingPositionY = 12;
 int unboardPositionX = 9;
 int unboardPositionY = 12;
 int count = 0;
-pthread_mutex_t log_lock;
+pthread_mutex_t log_lock, add_lock;
 
 //Atualiza tela
 void printScreen(){
@@ -83,9 +84,27 @@ void update_log_message(char message[])
 {
   pthread_mutex_lock(&log_lock);
   int logPosition = 39;
-  for (int i = 0; i < S_WIDTH; i++)
-    screen[logPosition][i] = message[i];
+  screen[logPosition][0] = 'L';
+  screen[logPosition][1] = 'O';
+  screen[logPosition][2] = 'G';
+  screen[logPosition][3] = ':';
+  screen[logPosition][4] = ' ';
+  int cnt = 5;
+  for (int i = 0; i < S_WIDTH-5; i++)
+    screen[logPosition][cnt++] = message[i];
   pthread_mutex_unlock(&log_lock);
+}
+
+void update_ride_log(unsigned int ride)
+{
+  int ridePositionY = 32, ridePositionX = 48;
+
+  char rs[2];
+  sprintf(rs, "%02d", ride);
+  int cnt = 0;
+  for (int i = ridePositionX; i <= ridePositionX+1; i++)
+    screen[ridePositionY][i] = rs[cnt++];
+
 }
 
 char intToChar(int number){
@@ -102,6 +121,7 @@ void updateCount(){
 
 //Adiciona passageiros na area de embarque 
 void addPassenger(){
+  pthread_mutex_lock(&add_lock);
   screen[boardingPositionY][boardingPositionX] = FILLED_SYMBOL;
   if(boardingPositionX>47){
     boardingPositionY+=1;
@@ -110,14 +130,41 @@ void addPassenger(){
   else{
     boardingPositionX+=1;    
   }
+  pthread_mutex_unlock(&add_lock);
+}
+
+void arrival_scene(int pid)
+{
+  char log[100];
+  memset(log, 0, sizeof(log));
+  sprintf(log, "O passageiros %d entrou na zona de embarque.\n", pid);
+  update_log_message(log);
+  addPassenger();
 }
 
 // Inicia animação
-void start_animation(int numberOfPassengers){
-  for(int i=0;i<numberOfPassengers;i++){
-    addPassenger();
-  }
+void start_animation(int numberOfPassengers, int C) {
+  
+  int nPositionY = 30, cPositionY = 31;
+  int xPosition = 42;
+
+  char str[2];
+  
+  sprintf(str, "%02d", numberOfPassengers);
+  int cnt = 0;
+  for (int i = xPosition; i <= xPosition+1; i++)
+    screen[nPositionY][i] = str[cnt++];  
+  
+  sprintf(str, "%02d", C);
+  cnt = 0;
+  for (int i = xPosition; i <= xPosition+1; i++)
+    screen[cPositionY][i] = str[cnt++];   
+
+  // for(int i=0;i<numberOfPassengers;i++){
+  //   addPassenger();
+  // }
   printScreen();
+
 }
 
 //Embarca passageiros

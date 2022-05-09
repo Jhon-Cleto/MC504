@@ -29,13 +29,17 @@ int last_ride = 0;
 void *car(void *arg)
 {
     ui rides = (n % C) == 0 ? n/C : n/C + 1;
+    ui rides_count = 0;
     char log[100];
     memset(log, 0, sizeof(log));
     
+    if(rides == 1)
+        last_ride = 1;
+
     while(rides--)
     {
         // load();
-
+        update_ride_log(++rides_count);
         sprintf(log, "O carro está pronto o embarque.\n");
         update_log_message(log);
         
@@ -79,10 +83,12 @@ void *passenger(void *p)
     ui tickets = p_info.tickets;
     char log[100];
     memset(log, 0, sizeof(log));
+    
+    sleep(rand()%5); // delay na chegada dos passageiros
+    arrival_scene(id);
 
     while (tickets--)
     {
-        sleep(rand()%5); // delay na chegada dos passageiros
         sem_wait(&boardQueue);
         
         // board();
@@ -127,7 +133,8 @@ void *passenger(void *p)
         }
         pthread_mutex_unlock(&lr_mutex);
     }
-
+    sprintf(log, "%d terminou a viagem\n", id);
+    update_log_message(log);
     return NULL;
 }
 
@@ -137,9 +144,9 @@ int main(int argc, char *argv[])
     // Dados Iniciais
     printf(CLEAN);   
     printf("The Roller Coaster Problem\n");
-    printf("Digite o número total de passageiros:\n");
+    printf("Insira o número total de passageiros:\n");
     scanf(" %d", &n);
-    printf("Digire o número de assentos no carrinho:\n");
+    printf("Insira o número de assentos no carrinho:\n");
     scanf(" %d", &C);
 
     if (n < C)
@@ -152,7 +159,7 @@ int main(int argc, char *argv[])
     pthread_t thr_psgrs[n], thr_car;
     p_data p_infos[n];
 
-    start_animation(n);
+    start_animation(n, C);
 
 
     sem_init(&mutex1, 0, 1);
