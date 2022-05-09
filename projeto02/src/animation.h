@@ -1,11 +1,6 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H 1
 
-#include <semaphore.h>
-
-// sem_t boardingArea_mutex;
-// sem_t unboardingArea_mutex;
-
 // Iniciar o ambiente de animação
 void start_animation(int numberOfPassengers, int C);
 

@@ -49,7 +49,7 @@ void* car(void *arg)
         sem_wait(&allAboard);
 
         // run();
-        sprintf(log, "O carro está se movimentando.\n");
+        sprintf(log, "O carro está percorrendo a montanha russa.\n");
         update_log_message(log);
         move_car_scene();
 
@@ -86,7 +86,7 @@ void* passenger(void *p)
     char log[100];
     memset(log, 0, sizeof(log));
     
-    sleep(rand() % 5);  // Delay na chegada do passageiro
+    sleep(rand() % (n/2));  // Delay na chegada do passageiro
     arrival_scene(id);
 
     while (tickets--)
@@ -143,7 +143,7 @@ void* passenger(void *p)
         pthread_mutex_unlock(&lr_mutex);
     }
 
-    sprintf(log, "%d terminou a viagem\n", id);
+    sprintf(log, "O passageiro %d foi embora.\n", id);
     update_log_message(log);
     
     return NULL;

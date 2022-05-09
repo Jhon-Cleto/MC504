@@ -7,59 +7,58 @@
 #include "animation.h"
 
 //Define tamanho da tela
-#define HEIGHT 38
 #define S_HEIGHT 41
 #define S_WIDTH 100
+#define HEIGHT 38
 
-#define CLEAR "\e[1;1H\e[2J"
-
+#define CLEAR "\e[1;1H\e[2J" 
 #define EMPTY_SYMBOL '+'
 #define FILLED_SYMBOL 'P'
 #define VOID_SYMBOL ' '
 
 //Estado inicial da tela
 char screen[S_HEIGHT][S_WIDTH]= {
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "      ~~~~~~~~~~~~~~~~~~ |     | ~~~~~~~~~~~~~~~~~~      \n",
-  "      ~                ~ |     | ~                ~      \n",
-  "      ~                ~ |     | ~                ~      \n",
-  "      ~                ~ |     | ~                ~      \n",
-  "      ~                D |     | ~                ~      \n",
-  "      ~                E |     | E                ~      \n",
-  "      ~                S |     | M                ~      \n",
-  "      ~                E | [+] | B                ~      \n",
-  "      ~                M | [+] | A                ~      \n",
-  "      ~                B | [+] | R                ~      \n",
-  "      ~                A | [+] | Q                ~      \n",
-  "      ~                R | [+] | U                ~      \n",
-  "      ~                Q | \\#/ | E                ~     \n",
-  "      ~                U |     | ~                ~      \n",
-  "      ~                E |     | ~                ~      \n",
-  "      ~                ~ |     | ~                ~      \n",
-  "      ~                ~ |     | ~                ~      \n",
-  "      ~~~~~~~~~~~~~~~~~~ |     | ~~~~~~~~~~~~~~~~~~      \n",
-  "                         |     |                         \n",
-  "                         |     |       Dados:            \n",
-  "                         |     |       n:                \n",
-  "                         |     |       C:                \n",
-  "                         |     |       Corrida:          \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "                         |     |                         \n",
-  "---------------------------------------------------------\n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "      ~~~~~~~~~~~~~~~~~~ |     | ~~~~~~~~~~~~~~~~~~         \n",
+  "      ~                ~ |     | ~                ~         \n",
+  "      ~                ~ |     | ~                ~         \n",
+  "      ~                ~ |     | ~                ~         \n",
+  "      ~                D |     | ~                ~         \n",
+  "      ~                E |     | E                ~         \n",
+  "      ~                S |     | M                ~         \n",
+  "      ~                E | [+] | B                ~         \n",
+  "      ~                M | [+] | A                ~         \n",
+  "      ~                B | [+] | R                ~         \n",
+  "      ~                A | [+] | Q                ~         \n",
+  "      ~                R | [+] | U                ~         \n",
+  "      ~                Q | \\#/ | E                ~        \n",
+  "      ~                U |     | ~                ~         \n",
+  "      ~                E |     | ~                ~         \n",
+  "      ~                ~ |     | ~                ~         \n",
+  "      ~                ~ |     | ~                ~         \n",
+  "      ~~~~~~~~~~~~~~~~~~ |     | ~~~~~~~~~~~~~~~~~~         \n",
+  "                         |     |                            \n",
+  "                         |     |       Dados:               \n",
+  "                         |     |       n:                   \n",
+  "                         |     |       C:                   \n",
+  "                         |     |       Corrida:             \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "                         |     |                            \n",
+  "------------------------------------------------------------\n",
   "\n",
-  "---------------------------------------------------------\n",
+  "------------------------------------------------------------\n",
 };	
 
 //Variaveis usadas para posições
@@ -68,16 +67,17 @@ int boardingPositionY = 12;
 int unboardPositionX = 9;
 int unboardPositionY = 12;
 int count = 0;
+
+// Locks para alterar elementos na tela
 pthread_mutex_t log_lock, add_lock;
 
 //Atualiza tela
-void printScreen(){
-  // system("clear"); 
+void printScreen() {
   printf(CLEAR);
   for (int i = 0; i < S_HEIGHT; i++)
     printf("%s", screen[i]);
 
-  usleep(100000);
+  usleep(1e5);
 }
 
 void update_log_message(char message[])
@@ -92,6 +92,7 @@ void update_log_message(char message[])
   int cnt = 5;
   for (int i = 0; i < S_WIDTH-5; i++)
     screen[logPosition][cnt++] = message[i];
+  printScreen();
   pthread_mutex_unlock(&log_lock);
 }
 
@@ -113,21 +114,21 @@ char intToChar(int number){
   return *charNumber;
 }
 
-void updateCount(){
+void updateCount() {
   screen[17][28] = intToChar(count/10);
   screen[18][28] = intToChar(count%10);
   usleep(0.3e6);
 }
 
 //Adiciona passageiros na area de embarque 
-void addPassenger(){
+void addPassenger() {
   pthread_mutex_lock(&add_lock);
   screen[boardingPositionY][boardingPositionX] = FILLED_SYMBOL;
-  if(boardingPositionX>47){
+  if (boardingPositionX>47) {
     boardingPositionY+=1;
     boardingPositionX=35;
   }
-  else{
+  else {
     boardingPositionX+=1;    
   }
   pthread_mutex_unlock(&add_lock);
@@ -144,10 +145,8 @@ void arrival_scene(int pid)
 
 // Inicia animação
 void start_animation(int numberOfPassengers, int C) {
-  
   int nPositionY = 30, cPositionY = 31;
   int xPosition = 42;
-
   char str[2];
   
   sprintf(str, "%02d", numberOfPassengers);
@@ -160,20 +159,16 @@ void start_animation(int numberOfPassengers, int C) {
   for (int i = xPosition; i <= xPosition+1; i++)
     screen[cPositionY][i] = str[cnt++];   
 
-  // for(int i=0;i<numberOfPassengers;i++){
-  //   addPassenger();
-  // }
   printScreen();
-
 }
 
 //Embarca passageiros
-void boarding_scene(){
-  if(boardingPositionX<36){
+void boarding_scene() {
+  if (boardingPositionX<36) {
     boardingPositionY-=1;
     boardingPositionX=48;
   }
-  else{
+  else {
     boardingPositionX-=1;
   }
   screen[boardingPositionY][boardingPositionX] = VOID_SYMBOL;
@@ -182,7 +177,6 @@ void boarding_scene(){
 
   int carHead = 22, symCol = 28;
 
-  
   for (int i = carHead-1; i >= carHead-5; i--)
   {
     if (screen[i][symCol] == EMPTY_SYMBOL)
@@ -191,27 +185,9 @@ void boarding_scene(){
       screen[i][symCol] = FILLED_SYMBOL;
       break;
     }
-    
   }
-  
-  printScreen();
-}
 
-//Move o carrinho
-void old_move_car_scene(){
-  int lineStart = 22;
-  int lengthCar = 7;
-  int columnStart = 21;
-  int columnEnd = 23;
-  int i, j, k; 
-  for(k=0;k<HEIGHT+1;k++){
-    for(j=columnStart; j<=columnEnd; j++){
-      for(i=0;i<lengthCar;i++)
-        screen[((lineStart+k-i+1)%(HEIGHT+1))][j]= screen[((lineStart+k-i)%(HEIGHT+1))][j]; 
-    }
-  //  usleep(100000);    //Define framehate
-   printScreen();
-  }
+  printScreen();
 }
 
 // Move o carrinho uma posição para baixo
@@ -238,13 +214,13 @@ void move_one_step2(int carHead, int carTail)
   for (int i = carHead; i >= 0 ; i--)
   {
     screen[i][columnStart] = '[';
-    if(i==1){
+    if (i==1) {
       screen[i][columnStart+1] = intToChar(count/10);
     }
-    else if(i==2){
+    else if (i==2) {
       screen[i][columnStart+1] = intToChar(count%10);
     }
-    else{
+    else {
       screen[i][columnStart+1] = FILLED_SYMBOL;
     }
     screen[i][columnStart+2] = ']';
@@ -270,7 +246,7 @@ void move_car_scene()
 
   // Carro saindo até desaparecer da tela
   int carHead = head_0, carTail = tail_0;
-  int carLength = 6, carWidth = 3;
+  int carLength = 6;
 
   while(carTail < HEIGHT)
   {
@@ -285,7 +261,7 @@ void move_car_scene()
   carHead = -1;
   carTail = carHead-5;
 
-  while (carHead < 6)
+  while (carHead < carLength)
   {
     move_one_step2(carHead++, carTail++);
     printScreen();
@@ -300,7 +276,7 @@ void move_car_scene()
 }
 
 //Desembarca passageiros
-void unboarding_scene(){
+void unboarding_scene() {
 
   int carHead = 22, symCol = 28;
 
@@ -329,12 +305,12 @@ void unboarding_scene(){
 }
 
 //Retirar passageiros do desembarque e adiciona no embarque
-void new_boarding_scene(){
-  if(unboardPositionX<9){
+void new_boarding_scene() {
+  if (unboardPositionX<9) {
     unboardPositionY-=1;
     unboardPositionX=20;
   }
-  else{
+  else {
     unboardPositionX-=1;
   }
   screen[unboardPositionY][unboardPositionX] = VOID_SYMBOL;
