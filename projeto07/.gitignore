@@ -5,3 +5,4 @@
 *.symvers
 *.ko
 *.mod
+src/base_files/
