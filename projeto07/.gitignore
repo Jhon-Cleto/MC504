@@ -6,3 +6,4 @@
 *.ko
 *.mod
 src/base_files/
+test/ccdd_app

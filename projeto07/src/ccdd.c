@@ -165,7 +165,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
     {
         case CC_GET_CONTENT: // Retorna o texto armazenado no device
             
-            printk(KERN_INFO "CCDD: Reading device content...\n");
+            printk(KERN_INFO "CCDD: IOCTL MODE - CC_GET_CONTENT\n");
             
             uarg = (ccd_cop_st *) arg;
 
@@ -174,7 +174,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
             
             if (copst.op == READ_AND_APPLY)
             {
-                printk(KERN_INFO "CCDD: Applying cipher...\n");
+                printk(KERN_INFO "CCDD: Reading device and applying cipher...\n");
                 // Aplica a Cifra de Cesar
                 for (i = 0; i < dds.mem_size; i++)
                     copst.buff[i] = get_rot_value(dds.mem[i]);
@@ -194,6 +194,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
 
         case CC_SET_CONTENT: // copia o texto para o device e/ou aplica a cifra
             
+            printk(KERN_INFO "CCDD: IOCTL MODE - CC_SET_CONTENT\n");
             uarg = (ccd_cop_st *) arg;
             
             if (copy_from_user(&copst, uarg, sizeof(copst)))
@@ -236,6 +237,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
 
         case CC_GET_MODE: // Informa o Modo de Operação
             
+            printk(KERN_INFO "CCDD: IOCTL MODE - CC_GET_MODE\n");
             printk(KERN_INFO "CCDD: Reading cipher mode...\n");
             
             if (copy_to_user((cc_mode_t *) arg, &dds.mode, sizeof(dds.mode)))
@@ -245,6 +247,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
 
         case CC_SET_MODE: // Altera o Modo de Operação
             
+            printk(KERN_INFO "CCDD: IOCTL MODE - CC_SET_MODE\n");
             printk(KERN_INFO "CCDD: Overwriting cipher mode...\n");
             
             if (copy_from_user(&dds.mode, (cc_mode_t *) arg, sizeof(dds.mode)))
@@ -254,6 +257,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
 
         case CC_GET_ROT: // Informa a Rotação
             
+            printk(KERN_INFO "CCDD: IOCTL MODE - CC_GET_ROT\n");
             printk(KERN_INFO "CCDD: Reading cipher rotation...\n");
             if (copy_to_user((int32_t *) arg, &dds.rot, sizeof(dds.rot)))
                 return -EFAULT;            
@@ -261,6 +265,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
 
         case CC_SET_ROT: // Altera a Rotação
             
+            printk(KERN_INFO "CCDD: IOCTL MODE - CC_SET_ROT\n");
             printk(KERN_INFO "CCDD: Overwriting cipher rotation...\n");
             
             if (copy_from_user(&dds.rot, (int32_t *) arg, sizeof(dds.rot)))
@@ -269,7 +274,8 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
             break;
         
         case CC_GET_STATE: // Informa o Estado do Dispositivo
-            
+
+            printk(KERN_INFO "CCDD: IOCTL MODE - CC_GET_STATE\n");
             printk(KERN_INFO "CCDD: Reading device state...\n");
             
             if (copy_to_user((ccd_st *) arg, &dds, sizeof(dds)))
@@ -278,13 +284,13 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
             break;
 
         case CC_RESET_STATE: // Estado Padrão
-            
+            printk(KERN_INFO "CCDD: IOCTL MODE - CC_RESET_STATE\n");
             printk(KERN_INFO "CCDD: Resetting device...\n");
             default_state();
             break;
 
         case CC_DEBUG_STATE: // DEBUG: Modifica o estado do Dispositivo
-            
+            printk(KERN_INFO "CCDD: IOCTL MODE - CC_DEBUG_STATE\n");
             printk(KERN_INFO "CCDD: (DEBUG) Setting device state...\n");
             
             if (copy_from_user(&dds, (ccd_st *) arg, sizeof(dds)))
@@ -293,7 +299,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
             break;
 
         default:
-            printk(KERN_INFO "Nothing happened!\n");
+            printk(KERN_INFO "CCDD: Nothing happened!\n");
             return -EINVAL;
     }
 

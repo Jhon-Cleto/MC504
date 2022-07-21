@@ -218,7 +218,7 @@ int main()
                 break;
             
             case 9:
-                printf("Type the new rotation:\n");
+                printf("Type the new rotation (>= 0):\n");
                 printf(">> ");
                 scanf(" %d", &rot);
                 printf("Changing cipher mode...\n");
