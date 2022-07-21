@@ -1,14 +1,18 @@
 # Projeto 07 - Pseudo Device Driver
 
-## Integrantes
+## Discente
 
 + Jhonatan Cléto, RA 256444
 
-## Apresentação
+<!-- ## Apresentação -->
 
 ## Tema
 
-Neste projeto implementamos um __Pseudo Device Driver__ para o kernel [__Linux__](https://pt.wikipedia.org/wiki/Linux_(n%C3%BAcleo)), mais especificamente implementamos um __Character Device Driver__ (CDD). O pseudo device implementado é um dispositivo criptográfico que trabalha com a [__Cifra de César__](https://pt.wikipedia.org/wiki/Cifra_de_C%C3%A9sar). A Cifra de Cesar é uma [__Cifra de Substituição__](https://pt.wikipedia.org/wiki/Cifra_de_substitui%C3%A7%C3%A3o) que trabalha com caracteres do alfabeto romano. A mensagem é cifrada através da substituição de seus caracteres, por meio de uma rotação predeterminada das posições das letras no alfabeto, uma ilustração da cifra é vista na Figura 1.
+Neste projeto implementamos um __Pseudo Device Driver__ para o kernel [__Linux__](https://pt.wikipedia.org/wiki/Linux_(n%C3%BAcleo)), mais especificamente implementamos um __Character Device Driver__ (CDD). O pseudo device implementado é um dispositivo criptográfico que trabalha com a [__Cifra de César__](https://pt.wikipedia.org/wiki/Cifra_de_C%C3%A9sar). A Cifra de César é uma [__Cifra de Substituição__](https://pt.wikipedia.org/wiki/Cifra_de_substitui%C3%A7%C3%A3o) que trabalha com caracteres do alfabeto romano. A mensagem é cifrada através da substituição de seus caracteres, por meio de uma rotação predeterminada das posições das letras no alfabeto, uma ilustração da cifra é vista na Figura 1.
+
+![Figura 1](assets/ROT13.png)
+
+_**Figura 1**: Exemplo de uma Cifra de César (ROT13)_
 
 O CDD é capaz de _codificar_ (_ENCODE_) e _decodificar_ (_DECODE_) mensagens, com um tamanho limitado pela memória do dispositivo. Adicionalmente, é possível alterar a rotação utilizada na cifra.
 
@@ -27,6 +31,9 @@ Armazena os arquivos do código fonto do projeto, sendo eles:
 Armazena a o código fonte da aplicação que utiliza o CCDD.
 
 + [`ccdd_app.c`](test/ccdd_app.c): Arquivo com o código fonte da aplicação.
+
+### [assets](assets/)
+Armazena arquivos utililizados na apresentação
 
 ## Estruturas de Dados
 
