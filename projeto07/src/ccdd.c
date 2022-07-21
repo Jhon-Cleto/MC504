@@ -172,7 +172,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
             if (copy_from_user(&copst, uarg, sizeof(copst)))
                 return -EFAULT;
             
-            if (copst.op == APPLY_AND_READ)
+            if (copst.op == READ_AND_APPLY)
             {
                 printk(KERN_INFO "CCDD: Applying cipher...\n");
                 // Aplica a Cifra de Cesar
@@ -192,9 +192,7 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
             
             break;
 
-        case CC_SET_CONTENT: // copia o texto para o device e aplica a cifra
-            
-            printk(KERN_INFO "CCDD: Overwriting device content...\n");
+        case CC_SET_CONTENT: // copia o texto para o device e/ou aplica a cifra
             
             uarg = (ccd_cop_st *) arg;
             
@@ -215,9 +213,23 @@ static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg)
             else if (copst.op == APPLY_AND_SAVE)
             {
                 // Aplica a Cifra de Cesar
-                printk(KERN_INFO "CCDD: Saving cipher text on device...\n");
+                printk(KERN_INFO "CCDD: Applying cipher...\n");
                 for (i = 0; i < dds.mem_size; i++)
                     dds.mem[i] = get_rot_value(copst.buff[i]);            
+                
+                printk(KERN_INFO "CCDD: Saving cipher text on device...\n");
+
+                if (copy_to_user(uarg->buff, dds.mem, dds.mem_size))
+                    return -EFAULT;                  
+            }
+
+            else if (copst.op == SAVE_ONLY)
+            {
+                // Salva a Mensagem apenas
+                printk(KERN_INFO "CCDD: Overwriting device content...\n");
+                printk(KERN_INFO "CCDD: Saving text on device...\n");
+                for (i = 0; i < dds.mem_size; i++)
+                    dds.mem[i] = copst.buff[i];
             }
             
             break;
@@ -315,7 +327,7 @@ void default_state(void)
     dds.rot = 13; // ROT13
     dds.mod_n = 26; // Limitar ao Alfabeto Romano
     dds.mode = ENCODE; // Encode Mode
-    dds.mem_size = 256; // Capacidade do Dispositivo
+    dds.mem_size = BSIZE; // Capacidade do Dispositivo
     dds.mem_used = 0; // Memória totalmente vazia
 
     // Zerar a memória

@@ -13,10 +13,11 @@ typedef enum cc_mode
 
 typedef enum ccdc_op
 {
-    APPLY_AND_SAVE = 0,
-    APPLY_ONLY,
-    APPLY_AND_READ,
-    READ_ONLY
+    APPLY_AND_SAVE = 0, // Aplica a cifra e salva o CDD
+    APPLY_ONLY,        //  Apenas aplica a cifra
+    SAVE_ONLY,        //   Salva a mensagem do CDD sem aplicar a cifra
+    READ_AND_APPLY,  //    Lê a mensagem no CDD cifrando-a
+    READ_ONLY       //     Apenas lê a mensagem no CDD
 } ccdc_op_t;
 
 typedef struct ccd_struct

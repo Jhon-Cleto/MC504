@@ -13,6 +13,9 @@ typedef int int32_t;
 int main()
 {
     int op, md_op, fd, ret, test_loop = 1;
+    char b2[2*BSIZE];
+    memset(b2, 0, 2*BSIZE);
+
     cc_mode_t mode;
     int32_t rot;
     ccd_st d_state;
@@ -39,15 +42,16 @@ int main()
         printf("(00) Exit\n");
         printf("(01) Apply Cipher\n");
         printf("(02) Apply Cipher and Save on Device\n");
-        printf("(03) Read from Device\n");
-        printf("(04) Read from Device and Apply Cipher\n");
-        printf("(05) Get Cipher Mode\n");
-        printf("(06) Set Cipher Mode\n");
-        printf("(07) Get Cipher Rotation\n");
-        printf("(08) Set Cipher Rotation\n");
-        printf("(09) Get Device State\n");
-        printf("(10) Reset Device State\n");
-        printf("(11) DEBUG: Set Device State\n");
+        printf("(03) Save on Device only\n");
+        printf("(04) Read from Device\n");
+        printf("(05) Read from Device and Apply Cipher\n");
+        printf("(06) Get Cipher Mode\n");
+        printf("(07) Set Cipher Mode\n");
+        printf("(08) Get Cipher Rotation\n");
+        printf("(09) Set Cipher Rotation\n");
+        printf("(10) Get Device State\n");
+        printf("(11) Reset Device State\n");
+        printf("(12) DEBUG: Set Device State\n");
         printf("---------------------------\n");
         printf("\nType one Operation:\n");
         printf(">> ");
@@ -57,36 +61,84 @@ int main()
         {
 
             case 1:
+                memset(b2, 0, 2*BSIZE);
                 printf("Enter text to apply cipher:\n");
                 printf(">> ");
-                scanf(" %[^\n]s", copst.buff);
-                printf("Applying cipher using the device...\n");
-                copst.op = APPLY_ONLY;
-                ret = ioctl(fd, CC_SET_CONTENT, &copst);
-                if (ret == -1)
-                    perror(">> Error");
-                else
-                    printf("Resulting text: %s\n", copst.buff);
+                scanf(" %[^\n]s", b2);
                 
-                memset(copst.buff, 0, BSIZE);
+                if(strlen(b2) > BSIZE)
+                    printf("Invalid content size!\n");                
+                
+                else
+                {
+                    memcpy(copst.buff, b2, BSIZE);
+                    printf("Applying cipher using the device...\n");
+                    copst.op = APPLY_ONLY;
+                    ret = ioctl(fd, CC_SET_CONTENT, &copst);
+                    if (ret == -1)
+                        perror(">> Error");
+                    else
+                        printf("Resulting text: %s\n", copst.buff);
+                    
+                    memset(copst.buff, 0, BSIZE);
+                }
+
                 break;            
 
             case 2:
+                memset(b2, 0, 2*BSIZE);
                 printf("Enter text to apply cipher and save on device:\n");
                 printf(">> ");
-                scanf(" %[^\n]s", copst.buff);
-                printf("Writing text on device...\n");
-                copst.op = APPLY_AND_SAVE;
-                ret = ioctl(fd, CC_SET_CONTENT, &copst);
-                if (ret == -1)
-                    perror(">> Error");
+                scanf(" %[^\n]s", b2);
+
+                if(strlen(b2) > BSIZE)
+                    printf("Invalid content size!\n");     
+
                 else
-                    printf("The text has been written to the device!\n");
-                
-                memset(copst.buff, 0, BSIZE);
+                {
+                    memcpy(copst.buff, b2, BSIZE);
+                    printf("Writing text on device...\n");
+                    copst.op = APPLY_AND_SAVE;
+                    ret = ioctl(fd, CC_SET_CONTENT, &copst);
+                    if (ret == -1)
+                        perror(">> Error");
+                    else
+                    {
+                        printf("The cipher text has been save on the device!\n");
+                        printf("Resulting text: %s\n", copst.buff);
+                    }
+                    
+                    memset(copst.buff, 0, BSIZE);
+                }
+
                 break;
 
             case 3:
+                memset(b2, 0, 2*BSIZE);
+                printf("Enter text to save on device:\n");
+                printf(">> ");
+                scanf(" %[^\n]s", b2);
+
+                if(strlen(b2) > BSIZE)
+                    printf("Invalid content size!\n");     
+
+                else
+                {
+                    memcpy(copst.buff, b2, BSIZE);
+                    printf("Writing text on device...\n");
+                    copst.op = SAVE_ONLY;
+                    ret = ioctl(fd, CC_SET_CONTENT, &copst);
+                    if (ret == -1)
+                        perror(">> Error");
+                    else
+                        printf("The text has been save on the device!\n");
+                    
+                    memset(copst.buff, 0, BSIZE);
+                }
+
+                break;
+
+            case 4:
                 printf("Reading the device...\n");
                 copst.op = READ_ONLY;
                 ret = ioctl(fd, CC_GET_CONTENT, &copst);
@@ -98,9 +150,9 @@ int main()
                 memset(copst.buff, 0, BSIZE);
                 break;
             
-            case 4:
+            case 5:
                 printf("Reading the device and applying cipher...\n");
-                copst.op = APPLY_AND_READ;
+                copst.op = READ_AND_APPLY;
                 ret = ioctl(fd, CC_GET_CONTENT, &copst);
                 if (ret == -1)
                     perror(">> Error");
@@ -110,7 +162,7 @@ int main()
                 memset(copst.buff, 0, BSIZE);
                 break;
             
-            case 5:
+            case 6:
                 printf("Reading the device...\n");
                 ret = ioctl(fd, CC_GET_MODE, &mode);
                 if (ret == -1)
@@ -125,7 +177,7 @@ int main()
                 }
                 break;
 
-            case 6:
+            case 7:
                 printf("Available cipher modes:\n(0) ENCODE\n(1) DECODE\n");
                 printf("Type the mode:\n");
                 printf(">> ");
@@ -156,7 +208,7 @@ int main()
                 }
                 break;
 
-            case 7:
+            case 8:
                 printf("Reading the device...\n");
                 ret = ioctl(fd, CC_GET_ROT, &rot);
                 if (ret == -1)
@@ -165,7 +217,7 @@ int main()
                     printf("Cipher Rotation: %d\n", rot);          
                 break;
             
-            case 8:
+            case 9:
                 printf("Type the new rotation:\n");
                 printf(">> ");
                 scanf(" %d", &rot);
@@ -177,7 +229,7 @@ int main()
                     printf("Cipher rotation was changed to: %d\n", rot);          
                 break;                
 
-            case 9:
+            case 10:
                 printf("Reading the device...\n");
                 ret = ioctl(fd, CC_GET_STATE, &d_state);
                 if (ret == -1)
@@ -194,7 +246,7 @@ int main()
                 }
                 break;
             
-            case 10:
+            case 11:
                 printf("Resetting device state...\n");
                 ret = ioctl(fd, CC_RESET_STATE);
                 if (ret == -1)
@@ -203,9 +255,8 @@ int main()
                     printf("The device has been reset!\n");
                 break;
 
-            case 11:
-                char b2[512];
-                memset(b2, 0, 512);
+            case 12:
+                memset(b2, 0, 2*BSIZE);
                 printf("DEBUG operation!\n");
                 printf("Type the device state:\n");
                 printf("(mode [0: ENCODE, 1: DECODE], rot [>= 0], content [%d chars]).\n", BSIZE);
