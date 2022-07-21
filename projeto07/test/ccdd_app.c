@@ -24,6 +24,7 @@ int main()
     char buffer[BSIZE];
     memset(buffer, 0, BSIZE);
 
+    printf("Caesar Cipher Device App\nOpening the Device file...\n\n");
     fd = open(DEV_FILE_NAME, O_RDWR);
 
     if (fd == -1)
@@ -59,18 +60,22 @@ int main()
                     perror(">> Error");
                 else
                     printf("Text on device: %s\n", buffer);
+                
+                memset(buffer, 0, BSIZE);
                 break;
             
             case 2:
                 printf("Enter text to write on device:\n");
                 printf(">> ");
-                scanf(" %s", &buffer);
+                scanf(" %[^\n]s", &buffer);
                 printf("Writing text on device...\n");
                 ret = write(fd, buffer, strlen(buffer));
                 if (ret == -1)
                     perror(">> Error");
                 else
                     printf("The text has been written to the device!\n");
+                
+                memset(buffer, 0, BSIZE);
                 break;
             
             case 3:
@@ -170,9 +175,10 @@ int main()
                 char b2[512];
                 memset(b2, 0, 512);
                 printf("DEBUG operation!\n");
-                printf("Type the device state (mode [0: ENCODE, 1: DECODE], rot [>= 0], content [%d chars]).\n", BSIZE);
+                printf("Type the device state:\n");
+                printf("(mode [0: ENCODE, 1: DECODE], rot [>= 0], content [%d chars]).\n", BSIZE);
                 printf(">> ");
-                scanf("%d, %d, %s", &md_op, &d_state.rot, &b2);
+                scanf(" %d, %d, %[^\n]s", &md_op, &d_state.rot, &b2);
 
                 if (md_op && md_op != 1)
                     printf("Invalid cipher mode!\n");
@@ -187,7 +193,7 @@ int main()
                 {
                     if (!md_op)
                         d_state.mode = ENCODE;
-                    else if (md_op == 1)
+                    else
                         d_state.mode = DECODE;
 
                     memcpy(d_state.mem, b2, BSIZE);
@@ -210,11 +216,17 @@ int main()
                 }
 
                 break;
+
             default:
                 test_loop = 0;
                 break;
         }
+
+        printf("\n---------------------------\n");
     }
     
+    printf("App finished!\nClosing the file...\n");
+    close(fd);
+    printf("Goodby!\n");
     return 0;
 }
