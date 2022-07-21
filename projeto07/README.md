@@ -4,15 +4,13 @@
 
 + Jhonatan Cléto, RA 256444
 
-<!-- ## Apresentação -->
-
 ## Tema
 
 Neste projeto implementamos um __Pseudo Device Driver__ para o kernel [__Linux__](https://pt.wikipedia.org/wiki/Linux_(n%C3%BAcleo)), mais especificamente implementamos um __Character Device Driver__ (CDD). O pseudo device implementado é um dispositivo criptográfico que trabalha com a [__Cifra de César__](https://pt.wikipedia.org/wiki/Cifra_de_C%C3%A9sar). A Cifra de César é uma [__Cifra de Substituição__](https://pt.wikipedia.org/wiki/Cifra_de_substitui%C3%A7%C3%A3o) que trabalha com caracteres do alfabeto romano. A mensagem é cifrada através da substituição de seus caracteres, por meio de uma rotação predeterminada das posições das letras no alfabeto, uma ilustração da cifra é vista na Figura 1.
 
 ![Figura 1](assets/ROT13.png)
 
-_**Figura 1**: Exemplo de uma Cifra de César (ROT13)_
+_**Figura 1**: Exemplo de uma Cifra de César (ROT13) - Fonte: Wikipedia._
 
 O CDD é capaz de _codificar_ (_ENCODE_) e _decodificar_ (_DECODE_) mensagens, com um tamanho limitado pela memória do dispositivo. Adicionalmente, é possível alterar a rotação utilizada na cifra.
 
@@ -51,12 +49,12 @@ typedef enum cc_mode
 
 typedef struct ccd_struct
 {
-    cc_mode_t mode; // Modo de Operação
-    int rot; // Tamanho da Rotação
-    int mod_n; // Limitar o conjunto de caracteres
-    char mem[BSIZE]; // Memória do Dispositivo
-    int mem_size; // Tamanho da memória
-    int mem_used; // Memória em uso
+    cc_mode_t mode;      // Modo de Operação
+    int rot;            // Tamanho da Rotação
+    int mod_n;         // Limitar o conjunto de caracteres
+    char mem[BSIZE];  // Memória do Dispositivo
+    int mem_size;    // Tamanho da memória
+    int mem_used;   // Memória em uso
 } ccd_st;
 ~~~
 
@@ -94,12 +92,11 @@ typedef struct ccd_content_op_struct
 + `CC_SET_CONTENT`: Alterar o conteúdo na memória do dispositivo
 + `CC_RESET_STATE`: Restaurar o estado padrão do dispositivo
 + `CC_GET_STATE`: Obter o estado do CCDD
-+ `CC_SET_CONTENT`: Alterar o estado do CCDD
++ `CC_DEBUG_STATE`: Alterar o estado do CCDD
 
 ## API
 
 ~~~C
-
 // Device File API
 static int ccdd_open(struct inode *i, struct file *f);
 static int ccdd_close(struct inode *i, struct file *f);
@@ -109,15 +106,37 @@ static ssize_t ccdd_write(struct file *f, const char __user *buf, size_t size, l
 // IOCTL API
 static long int ccdd_ioctl(struct file *f, unsigned cmd, unsigned long arg);
 
+// Kernel Module Interface
+static int __init ccdd_init(void)
+static void __exit ccdd_exit(void)
 ~~~
 
 ### Device File API
 
-API para acesso ao dispositivo por meio do [Vitual File System](https://en.wikipedia.org/wiki/Virtual_file_system) (VFS).
+API para acesso ao dispositivo por meio do [Vitual File System](https://en.wikipedia.org/wiki/Virtual_file_system) (VFS). Implementa operações de Abertura, Fechamento, Leitura e Escrita da abstração do dispositivo como um arquivo.
 
 ### IOCTL API
 
-API para acesso ao dispositivo por meio da chamada de sistema [ioctl](https://man7.org/linux/man-pages/man2/ioctl.2.html).
+API para acesso ao dispositivo por meio da chamada de sistema [ioctl](https://man7.org/linux/man-pages/man2/ioctl.2.html). Implementa o controle de operações de entrada e saída (I/O) no dispositivo, permitindo obter e alterar os valores em suas estruturas internas.
+
+### Kernel Module Interface
+
+Interface com as funções necessárias para registrar o Device Driver no kernel Linux.
+
+## Funções Internas do Driver
+
+~~~C
+char get_rot_value(char xo);
+void default_state(void);
+~~~
+
+### get_rot_value
++ Descrição: Rotaciona/substitui um caractere da mensagem.
++ Entrada: Caractere `xo` que será substituido.
++ Saída: Caractere `xr` novo caractere após a rotação.
+
+### default_state
++ Descrição: Retorna o dispositivo ao seu estado original - `(ROT13, ENCODE, "")`.
 
 ## Estado Padrão do Dispositivo
 
