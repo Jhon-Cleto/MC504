@@ -10,8 +10,6 @@ typedef int int32_t;
 
 #define DEV_FILE_NAME "/dev/ccdd"
 
-#define BSIZE 256
-
 int main()
 {
     int op, md_op, fd, ret, test_loop = 1;
@@ -21,8 +19,9 @@ int main()
     d_state.mem_size = BSIZE;
     d_state.mem_used = 0;
     
-    char buffer[BSIZE];
-    memset(buffer, 0, BSIZE);
+    ccd_cop_st copst;
+    copst.op = APPLY_AND_SAVE;
+    memset(copst.buff, 0, BSIZE);
 
     printf("Caesar Cipher Device App\nOpening the Device file...\n\n");
     fd = open(DEV_FILE_NAME, O_RDWR);
@@ -36,49 +35,82 @@ int main()
     while (test_loop)
     {
         // printf("\e[1;1H\e[2J");
-        printf("---- CCDD Operations ----\n");
-        printf("(1) Read from Device\n");
-        printf("(2) Write on Device\n");
-        printf("(3) Get Cipher Mode\n");
-        printf("(4) Set Cipher Mode\n");
-        printf("(5) Get Cipher Rotation\n");
-        printf("(6) Set Cipher Rotation\n");
-        printf("(7) Get Device State\n");
-        printf("(8) Reset Device State\n");
-        printf("(9) DEBUG: Set Device State\n");
-        printf("(0) Exit\n");
+        printf("----- CCDD Operations -----\n");
+        printf("(00) Exit\n");
+        printf("(01) Apply Cipher\n");
+        printf("(02) Apply Cipher and Save on Device\n");
+        printf("(03) Read from Device\n");
+        printf("(04) Read from Device and Apply Cipher\n");
+        printf("(05) Get Cipher Mode\n");
+        printf("(06) Set Cipher Mode\n");
+        printf("(07) Get Cipher Rotation\n");
+        printf("(08) Set Cipher Rotation\n");
+        printf("(09) Get Device State\n");
+        printf("(10) Reset Device State\n");
+        printf("(11) DEBUG: Set Device State\n");
+        printf("---------------------------\n");
         printf("\nType one Operation:\n");
         printf(">> ");
         scanf("%d", &op);
 
         switch (op)
         {
+
             case 1:
-                printf("Reading the device...\n");
-                ret = read(fd, buffer, BSIZE);
+                printf("Enter text to apply cipher:\n");
+                printf(">> ");
+                scanf(" %[^\n]s", copst.buff);
+                printf("Applying cipher using the device...\n");
+                copst.op = APPLY_ONLY;
+                ret = ioctl(fd, CC_SET_CONTENT, &copst);
                 if (ret == -1)
                     perror(">> Error");
                 else
-                    printf("Text on device: %s\n", buffer);
+                    printf("Resulting text: %s\n", copst.buff);
                 
-                memset(buffer, 0, BSIZE);
-                break;
-            
+                memset(copst.buff, 0, BSIZE);
+                break;            
+
             case 2:
-                printf("Enter text to write on device:\n");
+                printf("Enter text to apply cipher and save on device:\n");
                 printf(">> ");
-                scanf(" %[^\n]s", &buffer);
+                scanf(" %[^\n]s", copst.buff);
                 printf("Writing text on device...\n");
-                ret = write(fd, buffer, strlen(buffer));
+                copst.op = APPLY_AND_SAVE;
+                ret = ioctl(fd, CC_SET_CONTENT, &copst);
                 if (ret == -1)
                     perror(">> Error");
                 else
                     printf("The text has been written to the device!\n");
                 
-                memset(buffer, 0, BSIZE);
+                memset(copst.buff, 0, BSIZE);
+                break;
+
+            case 3:
+                printf("Reading the device...\n");
+                copst.op = READ_ONLY;
+                ret = ioctl(fd, CC_GET_CONTENT, &copst);
+                if (ret == -1)
+                    perror(">> Error");
+                else
+                    printf("Text on device: %s\n", copst.buff);
+                
+                memset(copst.buff, 0, BSIZE);
                 break;
             
-            case 3:
+            case 4:
+                printf("Reading the device and applying cipher...\n");
+                copst.op = APPLY_AND_READ;
+                ret = ioctl(fd, CC_GET_CONTENT, &copst);
+                if (ret == -1)
+                    perror(">> Error");
+                else
+                    printf("Resulting text: %s\n", copst.buff);
+                
+                memset(copst.buff, 0, BSIZE);
+                break;
+            
+            case 5:
                 printf("Reading the device...\n");
                 ret = ioctl(fd, CC_GET_MODE, &mode);
                 if (ret == -1)
@@ -93,7 +125,7 @@ int main()
                 }
                 break;
 
-            case 4:
+            case 6:
                 printf("Available cipher modes:\n(0) ENCODE\n(1) DECODE\n");
                 printf("Type the mode:\n");
                 printf(">> ");
@@ -124,7 +156,7 @@ int main()
                 }
                 break;
 
-            case 5:
+            case 7:
                 printf("Reading the device...\n");
                 ret = ioctl(fd, CC_GET_ROT, &rot);
                 if (ret == -1)
@@ -133,7 +165,7 @@ int main()
                     printf("Cipher Rotation: %d\n", rot);          
                 break;
             
-            case 6:
+            case 8:
                 printf("Type the new rotation:\n");
                 printf(">> ");
                 scanf(" %d", &rot);
@@ -145,7 +177,7 @@ int main()
                     printf("Cipher rotation was changed to: %d\n", rot);          
                 break;                
 
-            case 7:
+            case 9:
                 printf("Reading the device...\n");
                 ret = ioctl(fd, CC_GET_STATE, &d_state);
                 if (ret == -1)
@@ -162,7 +194,7 @@ int main()
                 }
                 break;
             
-            case 8:
+            case 10:
                 printf("Resetting device state...\n");
                 ret = ioctl(fd, CC_RESET_STATE);
                 if (ret == -1)
@@ -171,14 +203,14 @@ int main()
                     printf("The device has been reset!\n");
                 break;
 
-            case 9:
+            case 11:
                 char b2[512];
                 memset(b2, 0, 512);
                 printf("DEBUG operation!\n");
                 printf("Type the device state:\n");
                 printf("(mode [0: ENCODE, 1: DECODE], rot [>= 0], content [%d chars]).\n", BSIZE);
                 printf(">> ");
-                scanf(" %d, %d, %[^\n]s", &md_op, &d_state.rot, &b2);
+                scanf(" %d, %d, %[^\n]s", &md_op, &d_state.rot, b2);
 
                 if (md_op && md_op != 1)
                     printf("Invalid cipher mode!\n");
@@ -222,7 +254,7 @@ int main()
                 break;
         }
 
-        printf("\n---------------------------\n");
+        printf("---------------------------\n\n");
     }
     
     printf("App finished!\nClosing the file...\n");
